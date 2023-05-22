@@ -1,0 +1,36 @@
+version: "3.5"
+services:
+  db:
+    image: mysql:8.0.25
+    container_name: spug-db
+    restart: always
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - /data/spug/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=spug
+      - MYSQL_USER=spug
+      - MYSQL_PASSWORD=spug.cc
+      - MYSQL_ROOT_PASSWORD=spug.cc
+  spug:
+    image: liangwj72/spug-service:3.2.7
+    container_name: spug
+    privileged: true
+    restart: always
+    volumes:
+      # 注意，目录最好不要换，就是/data/spug，方便用docker编译时，直接将源码挂载到镜像中
+      - /data/spug/repos:/data/spug/repos
+      - /data/spug/logs:/data/spug/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      # 如果80端口被占用可替换为其他端口，例如: - "8000:80"
+      - "8080:80"
+    environment:
+      - SECRET_KEY=Today-is-good-day-to-die
+      - MYSQL_DATABASE=spug
+      - MYSQL_USER=spug
+      - MYSQL_PASSWORD=spug.cc
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+    depends_on:
+      - db
